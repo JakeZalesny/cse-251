@@ -40,6 +40,13 @@ def is_prime(n):
         i += 6
     return True
 
+def do_threading(start, range_count):
+    global prime_count
+    for i in range(start, range_count):
+        if is_prime(i):
+            prime_count += 1
+            print(i, end=', ', flush=True)
+
 
 if __name__ == '__main__':
     log = Log(show_terminal=True)
@@ -47,15 +54,33 @@ if __name__ == '__main__':
 
     # TODO 1) Get this program running
     # TODO 2) move the following for loop into 1 thread
-    # TODO 3) change the program to divide the for loop into 10 threads
-
+    threads = []
     start = 10000000000
     range_count = 100000
-    for i in range(start, start + range_count):
-        if is_prime(i):
-            prime_count += 1
-            print(i, end=', ', flush=True)
-    print(flush=True)
+    for i in range(1):
+        # divide the range up into into each CPU core, core 1 gets range 1-100, 
+        threads.append(threading.Thread(target=do_threading, args=(start, range_count)))
+    
+    for i in threads:
+        i.start()
+    
+    for i in threads:
+        i.join()
+
+    # TODO 3) change the program to divide the for loop into 10 threads
+    second_threads = []
+    start = 0
+    range_count = 10000
+    for i in range(10):
+        second_threads.append(threading.Thread(target=do_threading, args=(start, range_count)))
+        start = range_count + 1
+        range_count += 1000
+
+    for thread in second_threads:
+        thread.start()
+    
+    for thread in second_threads:
+        thread.join()
 
     # Should find 4306 primes
     log.write(f'Numbers processed = {numbers_processed}')

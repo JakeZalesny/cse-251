@@ -37,7 +37,7 @@ from cse251 import *
 You may change the following variable to `False` to skip drawing part 1, but you
 must set this value back to `True` when submitting the assignment.
 """
-draw_part_1 = True # <--- You may change this but read above.
+draw_part_1 = False # <--- You may change this but read above.
 
 def draw_square(tur, x, y, side, color='black'):
     """Draw Square"""
@@ -127,6 +127,44 @@ def draw_rectangles(tur):
             draw_rectangle(tur, x-10, y+5, 20, 15)
 
 
+# Threaded, you need to add a lock to the 2nd for loop of each of these
+def draw_threaded_squares(tur, lock):
+    """Draw a group of squares"""
+    for x in range(-300, 350, 200):
+        for y in range(-300, 350, 200):
+            lock.acquire()
+            draw_square(tur, x - 50, y + 50, 100)
+            lock.release()
+
+
+def draw_threaded_circles(tur, lock):
+    """Draw a group of circles"""
+    for x in range(-300, 350, 200):
+        for y in range(-300, 350, 200):
+            lock.acquire()
+            draw_circle(tur, x, y-2, 50)
+            lock.release()
+
+
+def draw_threaded_triangles(tur, lock):
+    """Draw a group of triangles"""
+    for x in range(-300, 350, 200):
+        for y in range(-300, 350, 200):
+            lock.acquire()
+            draw_triangle(tur, x-30, y-30+10, 60)
+            lock.release()
+
+
+def draw_threaded_rectangles(tur, lock):
+    """Draw a group of Rectangles"""
+    for x in range(-300, 350, 200):
+        for y in range(-300, 350, 200):
+            lock.acquire()
+            draw_rectangle(tur, x-10, y+5, 20, 15)
+            lock.release()
+
+
+
 def run_no_threads(tur, log, main_turtle):
     """Draw different shapes without using threads - DO NOT CHANGE"""
 
@@ -176,6 +214,18 @@ def run_with_threads(tur, log, main_turtle):
     # TODO - Start adding your code here.
     # You need to use 4 threads where each thread concurrently drawing one type of shape.
     # You are free to change any functions in this code except those we marked DO NOT CHANGE.
+    shapes = [draw_threaded_circles, draw_threaded_rectangles, draw_threaded_squares, draw_threaded_triangles]
+    threads = []
+    lock = threading.Lock()
+    
+    for func in shapes:
+        threads.append(threading.Thread(target=func, args=(tur, lock)))
+
+    for i in threads:
+        i.start()
+    
+    for i in threads:
+        i.join()
 
     log.step_timer('All drawing commands have been created')
 
