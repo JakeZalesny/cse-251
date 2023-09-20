@@ -29,16 +29,20 @@ from cse251 import *
 class Request_thread(threading.Thread):
     # TODO - Add code to make an API call and return the results
     # https://realpython.com/python-requests/
-    def __init__(self, url, group=None) -> None:
-        super().__init__(self, group)
+    def __init__(self, url):
+        super().__init__()
         self.url = url
-        self.lock = threading.Lock()
-        self.results
+        # self.lock = threading.Lock()
+        self.results = {}
     
     def run(self):
-        self.lock.acquire()
-        self.results = requests.get(self.url)
-        self.lock.release()
+        # self.lock.acquire()
+        response = requests.get(self.url)
+        if response.status_code == 200:
+            self.results = response.json()
+        else:
+            print('Response = ', response.status_code)
+        # self.lock.release()
 
 class Deck:
 
@@ -49,9 +53,9 @@ class Deck:
 
 
     def reshuffle(self):
-        print('Reshuffle Deck')
+        # print('Reshuffle Deck')
         # TODO - add call to reshuffle
-        reshuffle_url = f"https://deckofcardsapi.com/api/deck/{deck_id}/shuffle/"
+        reshuffle_url = rf"https://deckofcardsapi.com/api/deck/{self.id}/shuffle/"
         thread1 = Request_thread(url=reshuffle_url)
         thread1.start()
         thread1.join()
@@ -61,10 +65,15 @@ class Deck:
 
     def draw_card(self):
         # TODO add call to get a card
-        card_url = f"https://deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
+        card_url = rf"https://deckofcardsapi.com/api/deck/{self.id}/draw/?count=1"
         thread2 = Request_thread(url=card_url)
         thread2.start()
         thread2.join()
+        if thread2.results != {}:
+            self.remaining = thread2.results['remaining']
+            return thread2.results['cards'][0]['code']
+        else:
+            return '' 
 
     def cards_remaining(self):
         return self.remaining

@@ -54,9 +54,38 @@ call_count = 0
 
 
 # TODO Add your threaded class definition here
+class Request_thread(threading.Thread):
+    # TODO - Add code to make an API call and return the results
+    # https://realpython.com/python-requests/
+    def __init__(self, url):
+        super().__init__()
+        self.url = url
+        # self.lock = threading.Lock()
+        self.results = {}
+    
+    def run(self):
+        # self.lock.acquire()
+        response = requests.get(self.url)
+        if response.status_code == 200:
+            self.results = response.json()
+        else:
+            print('Response = ', response.status_code)
+        # self.lock.release()
+
 
 
 # TODO Add any functions you need here
+class Star_Wars:
+    def __init__(self) -> None:
+        self.results = {}
+        self.film_link = None
+    
+    def get_film_link(self, film_number:int):
+      thread = Request_thread(TOP_API_URL)
+      thread.start()
+      thread.join()
+      self.film_link = thread.results["films"][film_number-1]
+
 
 
 def main():
