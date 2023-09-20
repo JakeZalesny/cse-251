@@ -2,7 +2,7 @@
 Course: CSE 251 
 Lesson: L02 Team Activity
 File:   team.py
-Author: <Add name here>
+Author: Jake Zalesny
 
 Purpose: Playing Card API calls
 Website is: http://deckofcardsapi.com
@@ -13,8 +13,10 @@ Instructions:
 
 """
 
+from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime, timedelta
 import threading
+from typing import Any
 import requests
 import json
 
@@ -27,7 +29,16 @@ from cse251 import *
 class Request_thread(threading.Thread):
     # TODO - Add code to make an API call and return the results
     # https://realpython.com/python-requests/
-    pass
+    def __init__(self, url, group=None) -> None:
+        super().__init__(self, group)
+        self.url = url
+        self.lock = threading.Lock()
+        self.results
+    
+    def run(self):
+        self.lock.acquire()
+        self.results = requests.get(self.url)
+        self.lock.release()
 
 class Deck:
 
@@ -40,11 +51,20 @@ class Deck:
     def reshuffle(self):
         print('Reshuffle Deck')
         # TODO - add call to reshuffle
+        reshuffle_url = f"https://deckofcardsapi.com/api/deck/{deck_id}/shuffle/"
+        thread1 = Request_thread(url=reshuffle_url)
+        thread1.start()
+        thread1.join()
+        self.remaining = thread1.results["remaining"]
+
 
 
     def draw_card(self):
         # TODO add call to get a card
-        pass
+        card_url = f"https://deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
+        thread2 = Request_thread(url=card_url)
+        thread2.start()
+        thread2.join()
 
     def cards_remaining(self):
         return self.remaining
@@ -63,7 +83,7 @@ if __name__ == '__main__':
     #        team_get_deck_id.py program once. You can have
     #        multiple decks if you need them
 
-    deck_id = 'ENTER ID HERE'
+    deck_id = 'odbkqrjou9p0'
 
     # Testing Code >>>>>
     deck = Deck(deck_id)
