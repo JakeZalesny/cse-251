@@ -50,7 +50,7 @@ from cse251 import *
 TOP_API_URL = 'http://127.0.0.1:8790'
 
 # Global Variables
-call_count = 0
+call_count = 0 
 
 
 # TODO Add your threaded class definition here
@@ -68,8 +68,10 @@ class Request_thread(threading.Thread):
         response = requests.get(self.url)
         if response.status_code == 200:
             self.results = response.json()
+            global call_count 
+            call_count += 1
         else:
-            print('Response = ', response.status_code)
+            print('Response =', response.status_code)
         # self.lock.release()
 
 
@@ -79,12 +81,43 @@ class Star_Wars:
     def __init__(self) -> None:
         self.results = {}
         self.film_link = None
+        self.thread = None
+        self.film_data = None
     
-    def get_film_link(self, film_number:int):
-      thread = Request_thread(TOP_API_URL)
-      thread.start()
-      thread.join()
-      self.film_link = thread.results["films"][film_number-1]
+    def get_top_api(self):
+        self.thread = Request_thread(TOP_API_URL)
+        self.thread.start()
+        self.thread.join()
+    
+    def get_film_data(self, film_number:int) -> dict:
+      self.film_link = self.thread.results["films"]
+      self.film_link = rf"{self.film_link}{film_number}"
+      self.thread = Request_thread(self.film_link)
+      self.thread.start()
+      self.thread.join()
+      self.film_data = self.thread.results
+      return self.film_data
+    
+    def get_object(self, object:str):
+        objects_container = self.film_data[object]
+        objects = []
+        
+        threads = []
+
+        for object in objects_container:
+            self.thread = Request_thread(object)
+            threads.append(self.thread)
+        
+        for thread in threads:
+            thread.start()
+        
+        for thread in threads:
+            thread.join()
+            objects.append(thread.results["name"])
+        
+        return objects
+        
+      
 
 
 
@@ -93,11 +126,21 @@ def main():
     log.start_timer('Starting to retrieve data from the server')
 
     # TODO Retrieve Top API urls
-
+    star_wars = Star_Wars()
+    star_wars.get_top_api()
     # TODO Retrieve Details on film 6
-
+    film_data = star_wars.get_film_data(6)
+    characters = star_wars.get_object("characters")
+    planets = star_wars.get_object("planets")
+    starships = star_wars.get_object("starships")
+    vehicles = star_wars.get_object("vehicles")
+    species = star_wars.get_object("species")
+    print(characters)
+    print(planets)
+    print(starships)
+    print(vehicles)
+    print(species)
     # TODO Display results
-
     log.stop_timer('Total Time To complete')
     log.write(f'There were {call_count} calls to the server')
     
