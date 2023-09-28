@@ -130,16 +130,50 @@ def main():
     star_wars.get_top_api()
     # TODO Retrieve Details on film 6
     film_data = star_wars.get_film_data(6)
+    
     characters = star_wars.get_object("characters")
+    character_str = ", ".join(characters)
+    
     planets = star_wars.get_object("planets")
+    planet_str = ", ".join(planets)
+
     starships = star_wars.get_object("starships")
+    starship_str = ", ".join(starships)
+
     vehicles = star_wars.get_object("vehicles")
+    vehicles_str = ", ".join(vehicles)
+
     species = star_wars.get_object("species")
-    print(characters)
-    print(planets)
-    print(starships)
-    print(vehicles)
-    print(species)
+    species_str = ", ".join(species)
+
+    log.write(f"Title   : {film_data['title']}")
+    log.write(f"Director: {film_data['director']}")
+    log.write(f"Producer: {film_data['producer']}")
+    log.write(f"Released:{film_data['release_date']}")
+    
+    log.write("")
+    log.write(f"Characters: {len(characters)}")
+    log.write(f"{character_str}, ")
+    
+    log.write("")
+    log.write(f"Planets: {len(planets)}")
+    log.write(f"{planet_str}, ")
+    
+    log.write("")
+    log.write(f"Starships: {len(starships)}")
+    log.write(f"{starship_str}, ")
+    
+    log.write("")
+    log.write(f"Vehicles: {len(vehicles)}")
+    log.write(f"{vehicles_str}, ")
+    
+    log.write("")
+    log.write(f"Species: {len(species)}")
+    log.write("")
+    log.write(f"{species_str}, ")
+    
+    log.write("")
+
     # TODO Display results
     log.stop_timer('Total Time To complete')
     log.write(f'There were {call_count} calls to the server')
