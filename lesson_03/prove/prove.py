@@ -2,7 +2,7 @@
 Course: CSE 251 
 Lesson: L03 Prove
 File:   prove.py
-Author: <Add name here>
+Author: Jake Zalesny
 
 Purpose: Video Frame Processing
 
@@ -31,7 +31,7 @@ CPU_COUNT = mp.cpu_count() + 4
 
 # TODO Your final video needs to have 300 processed frames.
 # However, while you are testing your code, set this much lower!
-FRAME_COUNT = 20
+FRAME_COUNT = 300
 
 # RGB values for reference
 RED = 0
@@ -68,29 +68,46 @@ def create_new_frame(image_file, green_file, process_file):
 
 
 # TODO add any functions to need here
+def process_frame(frames):
+    image_file = rf'elephant/image{frames:03d}.png'
+    green_file = rf'green/image{frames:03d}.png'
+    process_file = rf'processed/image{frames:03d}.png'
+    create_new_frame(image_file=image_file, green_file=green_file, process_file=process_file)
 
 
 def main():
     all_process_time = timeit.default_timer()
     log = Log(show_terminal=True)
 
+    # Make a for loop that goes to 1 cpu then 2, then 3. 
     xaxis_cpus = []
     yaxis_times = []
 
     # TODO Process all frames trying 1 cpu, then 2, then 3, ... to CPU_COUNT
     #      add results to xaxis_cpus and yaxis_times
+    frames = range(1, FRAME_COUNT + 1)
+    for processors in range(1, CPU_COUNT + 1):
+        
+        time = timeit.default_timer()
+        xaxis_cpus.append(processors)
+        
+        with mp.Pool(processors) as p:
+            p.map(process_frame, frames)
+        
+        log.write(f"Total time for {processors} processes: {timeit.default_timer() - time}")
+        yaxis_times.append(timeit.default_timer() - time)
 
 
     # Sample code remove before submitting  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # process one frame #10
-    image_number = 10
+    # image_number = 10
 
-    image_file = rf'elephant/image{image_number:03d}.png'
-    green_file = rf'green/image{image_number:03d}.png'
-    process_file = rf'processed/image{image_number:03d}.png'
+    # image_file = rf'elephant/image{image_number:03d}.png'
+    # green_file = rf'green/image{image_number:03d}.png'
+    # process_file = rf'processed/image{image_number:03d}.png'
 
     start_time = timeit.default_timer()
-    create_new_frame(image_file, green_file, process_file)
+    # create_new_frame(image_file, green_file, process_file)
     print(f'\nTime To Process all images = {timeit.default_timer() - start_time}')
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

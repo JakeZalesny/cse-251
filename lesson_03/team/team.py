@@ -12,10 +12,12 @@ Instructions:
 
 """
 
+from collections.abc import Callable, Iterable, Mapping
 import random
 from datetime import datetime, timedelta
 import threading
 import multiprocessing as mp
+from typing import Any
 from matplotlib.pylab import plt
 import numpy as np
 import string
@@ -144,15 +146,38 @@ class Board():
                         return True
         return False
 
+class Board_Threaded_Search(threading.Thread):
+    def __init__(self, board:Board, word) -> None:
+        super().__init__()
+        self.board = board
+        self.word = word
+    
+    def run(self) -> None:
+        print(f'Finding {self.word}...')
+        
+        for row in range(self.board.size):
+            for col in range(self.board.size):
+                for d in range(0, 8):
+                    if self.board._word_at_this_location(row, col, d, self.word):
+                        return True 
 
 def main():
     board = Board()
     board.display()
+    threads = []
+    for word in words: 
+        threads.append(Board_Threaded_Search(board, word))
 
+    for thread in threads:
+        thread.start()
+    
+    for thread in threads:
+        thread.join()
+        
     start = time.perf_counter()
-    for word in words:
-        if not board.find_word(word):
-            print(f'Error: Could not find "{word}"')
+    # for word in words:
+    #     if not board.find_word(word):
+    #         print(f'Error: Could not find "{word}"')
     
     total_time = time.perf_counter() - start
 
